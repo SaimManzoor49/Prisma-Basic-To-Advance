@@ -28,9 +28,10 @@ model User {
   // largeNumber BigInt // very large number
   // preferances    Json // suported in POSTGRESQL
   // blob Bytes to store large files in bytes
-  writtenPosts   Post[]          @relation("writtenPosts")
-  favouritePosts Post[]          @relation("favouritedPosts")
-  userPreference UserPreference?
+  writtenPosts     Post[]          @relation("writtenPosts")
+  favouritePosts   Post[]          @relation("favouritedPosts")
+  userPreference   UserPreference? @relation(fields: [userPreferenceId], references: [id])
+  userPreferenceId String?         @unique
 
   // block level attributes
   @@unique([age, name]) // could't have same name and same age one must be different
@@ -65,8 +66,7 @@ model Category {
 model UserPreference {
   id           String  @id @default(uuid())
   emailUpdates Boolean @default(false)
-  user         User    @relation(fields: [userId], references: [id])
-  userId       String  @unique
+  user         User?
 }
 
 // above shows 1 to 1 relationShip with User model  
