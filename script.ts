@@ -3,11 +3,7 @@ const prisma = new PrismaClient();
 
 async function main() {
 
-const user = await  prisma.user.findMany({
-        where:{
-            name:"saim"
-        }
-    })
+const user = await  prisma.user.deleteMany({})
 
     console.log(user)
 

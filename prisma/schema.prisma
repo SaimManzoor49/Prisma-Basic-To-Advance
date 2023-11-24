@@ -3,15 +3,75 @@
 
 generator client {
   provider = "prisma-client-js"
+  // could have multiple generators
+  // like GraphQL 
+  // to add generators npm liberaries are avaliable
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // only one DB is allowed in prisma at a time
 }
 
+//modal represents a Table in your DB
+// 
+model User {
+  id    String @id @default(uuid())
+  name  String
+  age   Int
+  email String @unique
 
-model User{
-  id Int @id @default(autoincrement())
-  name String
+  // isAdmin        Boolean
+  role Role @default(BASIC) // multiple roles instead of 1 like above
+
+  // largeNumber BigInt // very large number
+  // preferances    Json // suported in POSTGRESQL
+  // blob Bytes to store large files in bytes
+  writtenPosts   Post[]          @relation("writtenPosts")
+  favouritePosts Post[]          @relation("favouritedPosts")
+  userPreference UserPreference?
+
+  // block level attributes
+  @@unique([age, name]) // could't have same name and same age one must be different
+  @@index([email]) // helps performance and sorting prefferd to use with field you will ues for query 
+}
+
+model Post {
+  id             String     @id @default(uuid())
+  title          String
+  averageRatings Float
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  author         User       @relation("writtenPosts", fields: [authorId], references: [id])
+  authorId       String
+  favoiritedBy   User?      @relation("favouritedPosts", fields: [favouriteById], references: [id])
+  favouriteById  String?
+  categories     Category[]
+
+  // @@id([title, authorId]) // insted of having specific id we can make composite(joing 2 or more field which will make 1 unique) ID
+}
+
+// above represents 1 to many relatioShip and also user could have more then one relations to same model
+
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+  post Post[]
+}
+
+// above represents many to many relations with Post model no need to create @relations for many to many
+
+model UserPreference {
+  id           String  @id @default(uuid())
+  emailUpdates Boolean @default(false)
+  user         User    @relation(fields: [userId], references: [id])
+  userId       String  @unique
+}
+
+// above shows 1 to 1 relationShip with User model  
+
+enum Role {
+  BASIC
+  ADMIN
 }
